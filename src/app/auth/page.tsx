@@ -33,6 +33,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const router = useRouter()
 
   async function handleGoogleLogin() {
@@ -59,15 +60,21 @@ export default function AuthPage() {
 
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password })
+        const { data, error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
+        // メール確認が必要な場合（session が null）
+        if (!data.session) {
+          setEmailSent(true)
+          return
+        }
         router.push('/onboarding')
+        router.refresh()
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        router.refresh()
         router.push('/')
       }
-      router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました')
     } finally {
@@ -119,6 +126,23 @@ export default function AuthPage() {
       {/* Right: auth form */}
       <div className="w-full md:w-[440px] flex items-center justify-center px-8 py-14">
         <div className="w-full max-w-sm">
+          {emailSent ? (
+            <div className="text-center">
+              <div className="text-4xl mb-4">📬</div>
+              <h2 className="text-xl font-bold text-white mb-2">メールを確認してください</h2>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                <span className="text-white">{email}</span> に確認メールを送りました。<br />
+                メール内のリンクをクリックするとログインできます。
+              </p>
+              <button
+                onClick={() => { setEmailSent(false); setMode('login') }}
+                className="mt-6 text-zinc-400 text-sm underline underline-offset-2 hover:text-white transition-colors"
+              >
+                ログイン画面に戻る
+              </button>
+            </div>
+          ) : (
+          <>
           <div className="mb-8">
             <h2 className="text-xl font-bold text-white mb-1">
               {mode === 'login' ? 'ログイン' : 'アカウントを作成'}
@@ -191,6 +215,8 @@ export default function AuthPage() {
               {loading ? '処理中...' : mode === 'login' ? 'ログイン' : 'アカウント作成'}
             </button>
           </form>
+          </>
+          )}
         </div>
       </div>
     </div>

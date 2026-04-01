@@ -15,30 +15,24 @@ export default function OnboardingPage() {
   async function handleComplete() {
     setLoading(true)
     const supabase = createClient()
-    let { data: { user } } = await supabase.auth.getUser()
-
-    // 未ログインの場合は匿名アカウントを自動作成
-    if (!user) {
-      const { data } = await supabase.auth.signInAnonymously()
-      user = data.user
-    }
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // 会社作成とプロフィール保存を並列実行
-    const [{ data: company }] = await Promise.all([
-      supabase.from('companies').insert({
-        user_id: user.id,
-        name: name.trim() || businessType,
-        business_type: businessType,
-        goals_challenges: goals,
-      }).select('id').single(),
-      supabase.from('profiles').upsert({
-        id: user.id,
-        business_type: businessType,
-        goals_challenges: goals,
-        onboarding_completed: true,
-      }),
-    ])
+    // 最初の会社を作成
+    const { data: company } = await supabase.from('companies').insert({
+      user_id: user.id,
+      name: name.trim() || businessType,
+      business_type: businessType,
+      goals_challenges: goals,
+    }).select('id').single()
+
+    // オンボーディング完了フラグ
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      business_type: businessType,
+      goals_challenges: goals,
+      onboarding_completed: true,
+    })
 
     if (company) {
       router.push(`/chat/${company.id}`)

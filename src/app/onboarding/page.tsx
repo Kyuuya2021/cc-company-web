@@ -15,7 +15,13 @@ export default function OnboardingPage() {
   async function handleComplete() {
     setLoading(true)
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let { data: { user } } = await supabase.auth.getUser()
+
+    // 未ログインの場合は匿名アカウントを自動作成
+    if (!user) {
+      const { data } = await supabase.auth.signInAnonymously()
+      user = data.user
+    }
     if (!user) return
 
     // 最初の会社を作成

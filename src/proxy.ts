@@ -27,12 +27,6 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // 未ログインユーザーをログインページへ
-  const publicPaths = ['/auth', '/auth/callback']
-  if (!user && !publicPaths.includes(pathname) && !pathname.startsWith('/_next')) {
-    return NextResponse.redirect(new URL('/auth', request.url))
-  }
-
   // ログイン済みユーザーが /auth にアクセスしたらチャットへ
   if (user && pathname === '/auth') {
     return NextResponse.redirect(new URL('/chat', request.url))

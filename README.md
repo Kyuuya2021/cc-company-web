@@ -1,36 +1,159 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CC Company Web
 
-## Getting Started
+AIが秘書として働く、ブラウザで使える仮想組織管理ツール。  
+チャットで話しかけるだけで、TODO・メモ・プロジェクト・経費などを自動で管理できます。
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## できること
+
+### 1. チャットで秘書に話しかける
+
+すべての操作はチャット画面から行います。秘書（Claude AI）が内容を判断して自動で処理します。
+
+```
+「今日やること：提案書を作る、ミーティング準備」
+→ TODOが2件自動で追加される
+
+「競合他社を調べたい」
+→ リサーチ部署として対応、内容をメモに保存
+
+「田中さんとの打ち合わせで、月額5万円で合意した」
+→ 決定事項としてノートに記録
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. TODO管理
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- チャットで「〇〇をやること追加して」→ 自動でTODO作成
+- サイドバーに今日のTODO一覧が表示される
+- チェックボックスをクリックして完了にできる
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. ノート・メモの自動記録
 
-## Learn More
+会話の中で重要な内容を自動で保存します。4種類に分類されます：
 
-To learn more about Next.js, take a look at the following resources:
+| 種類 | 用途 |
+|------|------|
+| 📝 メモ | 一般的なメモ |
+| ✅ 決定事項 | 「〇〇に決まった」などの決定内容 |
+| 💡 アイデア | アイデアの記録 |
+| 📥 受信箱 | とりあえず残しておきたいこと |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+→ サイドバー「ノート・メモ」から一覧で確認できます
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. 部署の自動追加と振り分け
 
-## Deploy on Vercel
+最初は秘書室だけ。同じ種類の作業が増えると「部署を作りましょうか？」と提案されます。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| 部署 | 担当内容 |
+|------|---------|
+| 🤵 秘書室 | TODO・メモ・相談・雑談（常時稼働） |
+| 📋 PM | プロジェクト・マイルストーン・チケット |
+| 🔍 リサーチ | 調査・競合分析・トレンド |
+| 📣 マーケティング | コンテンツ・SNS・広告・LP |
+| 💻 開発 | 実装・設計・バグ・アーキテクチャ |
+| 📊 経理 | 請求・経費・売上・確定申告 |
+| 🤝 営業 | クライアント・提案・見積・商談 |
+| 🎨 クリエイティブ | デザイン・ロゴ・ブランド |
+| 👥 HR | 採用・チーム・オンボーディング |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. プロジェクト管理
+
+- チャットで「〇〇プロジェクトを作って」→ 自動作成
+- プロジェクト内にチケット（タスク）を追加できる
+- ステータス管理：進行中 / 完了 / 一時停止
+- → サイドバー「プロジェクト」から一覧確認
+
+### 6. クライアント管理
+
+- チャットで「〇〇社をクライアントに追加して」→ 自動登録
+- ステータス管理：取引中 / 見込み / 非アクティブ
+- → サイドバー「クライアント」から一覧確認
+
+### 7. 経費記録
+
+- チャットで「1500円の交通費を記録して」→ 自動保存
+- 月別集計・総合計を自動計算
+- → サイドバー「経費」から一覧確認
+
+### 8. 複数の会社・プロジェクトを管理
+
+- サイドバー上部の会社名をクリック → 切り替えメニュー
+- 「新しい会社を追加」で別の事業・プロジェクトを追加
+- 会社ごとにデータが独立して管理される
+
+---
+
+## 画面構成
+
+```
+チャット画面（/chat/[companyId]）
+├── サイドバー
+│   ├── 会社セレクター（切り替え・追加）
+│   ├── 今日のTODO進捗
+│   ├── 部署一覧
+│   ├── データページリンク
+│   │   ├── 📝 ノート・メモ
+│   │   ├── 📋 プロジェクト
+│   │   ├── 👥 クライアント
+│   │   └── 💰 経費
+│   └── ログアウト
+└── チャットエリア
+    └── AIとの会話・操作すべてここから
+```
+
+---
+
+## セットアップ
+
+### 必要なもの
+
+- Node.js 18以上
+- Supabaseアカウント
+- AnthropicのAPIキー
+
+### 手順
+
+**1. 依存関係インストール**
+```bash
+npm install
+```
+
+**2. 環境変数を設定**
+
+`.env.local` を作成して以下を記入：
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+**3. Supabaseにデータベースを作成**
+
+SupabaseのSQL Editorで `supabase-schema.sql` の内容を実行してください。
+
+**4. 開発サーバー起動**
+```bash
+npm run dev
+```
+
+`http://localhost:3000` を開いてサインアップしてください。
+
+---
+
+## 技術スタック
+
+| 役割 | 技術 |
+|------|------|
+| フレームワーク | Next.js 16 (App Router) |
+| UI | React 19 + Tailwind CSS 4 |
+| データベース | Supabase (PostgreSQL) |
+| 認証 | Supabase Auth |
+| AI | Anthropic Claude API (claude-sonnet-4-6) |
+| 言語 | TypeScript |
+
+---
+
+## ベース
+
+[cc-company](https://github.com/Shin-sibainu/cc-company)（Claude Code プラグイン）をWebアプリとして再実装したものです。

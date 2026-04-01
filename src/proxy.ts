@@ -28,7 +28,8 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // 未ログインユーザーをログインページへ
-  if (!user && pathname !== '/auth' && !pathname.startsWith('/_next')) {
+  const publicPaths = ['/auth', '/auth/callback']
+  if (!user && !publicPaths.includes(pathname) && !pathname.startsWith('/_next')) {
     return NextResponse.redirect(new URL('/auth', request.url))
   }
 
